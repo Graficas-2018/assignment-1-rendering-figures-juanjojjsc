@@ -1,12 +1,12 @@
 // ModelView Matrix: defines where the square is positioned in the 3D coordinate system relative to the camera
-// Projection Matrix: required by the shader to convert the 3D space into the 2D space of the viewport. 
+// Projection Matrix: required by the shader to convert the 3D space into the 2D space of the viewport.
 var projectionMatrix, modelViewMatrix;
 
 // Attributes: Input variables used in the vertex shader. Since the vertex shader is called on each vertex, these will be different every time the vertex shader is invoked.
 // Uniforms: Input variables for both the vertex and fragment shaders. These are constant during a rendering cycle, such as lights position.
 // Varyings: Used for passing data from the vertex shader to the fragment shader.
 var vertexShaderSource =
-    
+
     "    attribute vec3 vertexPos;\n" +
     "    uniform mat4 modelViewMatrix;\n" +
     "    uniform mat4 projectionMatrix;\n" +
@@ -16,7 +16,7 @@ var vertexShaderSource =
     "            vec4(vertexPos, 1.0);\n" +
     "    }\n";
 
-var fragmentShaderSource = 
+var fragmentShaderSource =
     "    void main(void) {\n" +
     "    // Return the pixel color: always output white\n" +
     "    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n" +
@@ -25,19 +25,19 @@ var fragmentShaderSource =
 var shaderProgram, shaderVertexPositionAttribute, shaderProjectionMatrixUniform, shaderModelViewMatrixUniform;
 
 // Initializes the context for use with WebGL
-function initWebGL(canvas) 
+function initWebGL(canvas)
 {
 
     var gl = null;
     var msg = "Your browser does not support WebGL, or it is not enabled by default.";
 
-    try 
+    try
     {
         // The getContext method can take one of the following context id strings:
         // "2d" for a 2d canvas context, "webgl" for a WebGL context, or "experimental-webgl" to get a xontext for earlier-version browsers.
         // Use of "experimental-webgl" is recommended to get a context for all WebGL capable browsers.
         gl = canvas.getContext("experimental-webgl");
-    } 
+    }
     catch (e)
     {
         msg = "Error creating WebGL Context!: " + e.toString();
@@ -49,10 +49,10 @@ function initWebGL(canvas)
         throw new Error(msg);
     }
 
-    return gl;        
+    return gl;
 }
 
-// The viewport is the rectangular bounds of where to draw. 
+// The viewport is the rectangular bounds of where to draw.
 // In this case, the viewport will take up the entire contents of the canvas' display area.
 function initViewport(gl, canvas)
 {
@@ -77,13 +77,13 @@ function initShader(gl)
     // name     A domString specifying the name of the attribute variable whose location to get
     shaderVertexPositionAttribute = gl.getAttribLocation(shaderProgram, "vertexPos");
     gl.enableVertexAttribArray(shaderVertexPositionAttribute);
-    
+
     // gl.getUniformLocation(program, name);
     // program  A webgl program containing the attribute variable
     // name     A domString specifying the name of the uniform variable whose location to get
     shaderProjectionMatrixUniform = gl.getUniformLocation(shaderProgram, "projectionMatrix");
     shaderModelViewMatrixUniform = gl.getUniformLocation(shaderProgram, "modelViewMatrix");
-    
+
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
         alert("Could not initialise shaders");
     }
@@ -140,7 +140,7 @@ function createShader(gl, str, type)
     return shader;
 }
 
-function draw(gl, obj) 
+function draw(gl, obj)
 {
     // set the shader to use
     gl.useProgram(shaderProgram);
@@ -159,7 +159,7 @@ function draw(gl, obj)
     // offset: A GLintptr specifying an offset in bytes of the first component in the vertex attribute array
     gl.vertexAttribPointer(shaderVertexPositionAttribute, obj.vertSize, gl.FLOAT, false, 0, 0);
 
-    // WebGLRenderingContext.uniformMatrix4fv(location, transpose, value); 
+    // WebGLRenderingContext.uniformMatrix4fv(location, transpose, value);
     // location: A WebGLUniformLocation object containing the location of the uniform attribute to modify. The location is obtained using getAttribLocation().
     // transpose: A GLboolean specifying whether to transpose the matrix.
     // value: A Float32Array or sequence of GLfloat values.
@@ -171,26 +171,79 @@ function draw(gl, obj)
 }
 
 // TO DO: Create functions needed to generate the vertex data for the different figures.
-function createSquare(gl) 
+function createSquare(gl)
 {
-    var square = {};
+    var vertexBuffer = gl.createBuffer();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+    var verts = [
+        .5,  .5,  0.0,
+        -.5,  .5,  0.0,
+        .5, -.5,  0.0,
+        -.5, -.5,  0.0
+      ];
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
+
+    var square = {buffer:vertexBuffer, vertSize:3, nVerts:4, primtype:gl.TRIANGLE_STRIP};
     return square;
 }
 
 function createTriangle(gl)
 {
-    var triangle = {};
-    return triangle;
+    var vertexBuffer = gl.createBuffer();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+    var verts = [
+        0.0, 0.5, 0.0,
+        .5, -.5,  0.0,
+        -.5, -.5,  0.0,
+      ];
+
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
+
+      var triangle = {buffer:vertexBuffer, vertSize:3, nVerts:3, primtype:gl.TRIANGLES};
+      return triangle;
 }
 
 function createRhombus(gl)
 {
-    var rhombus = {};
+    var vertexBuffer = gl.createBuffer();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+    var verts = [
+        0.5, 0, 0.0,
+        0, .5, 0.0,
+        0, -.5, 0.0,
+        -0.5, 0, 0.0
+      ];
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
+
+    var rhombus = {buffer:vertexBuffer, vertSize:3, nVerts:4, primtype:gl.TRIANGLE_STRIP};
     return rhombus;
 }
 
 function createSphere(gl, radius)
 {
-    var sphere = {};
+    var vertexBuffer = gl.createBuffer();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+    var verts = [0,0,0];
+
+    var i = 25;
+    for(i; i < 320; i += 5)
+    {
+        verts.push(0.5 * Math.cos(i * (Math.PI / 180)));
+        verts.push(0.5 * Math.sin(i * (Math.PI / 180)));
+        verts.push(0);
+    }
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
+
+    var sphere = {buffer:vertexBuffer, vertSize:3, nVerts:verts.length/3, primtype:gl.TRIANGLE_FAN};
     return sphere;
-}        
+}
